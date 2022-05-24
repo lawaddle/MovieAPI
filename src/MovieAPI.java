@@ -3,6 +3,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,8 +24,16 @@ public class MovieAPI {
 
         for (Movie movie : movies)
         {
-            System.out.println(movie.getID() + " " + movie.getTitle() + " " + movie.getPosterPath() + " " + movie.getReleaseDate());
+            System.out.println(movie.getID() + " " + movie.getTitle() + " " + movie.getPosterPath() + " " + movie.getReleaseDate() + " " + movie.getPopularity() + " " + movie.getOverview());
         }
+
+        System.out.print("Which movie (enter ID)? ");
+        Scanner s = new Scanner(System.in);
+        String movieID = s.nextLine();
+
+        String movieURL = "https://api.themoviedb.org/3/movie/" + movieID + "?api_key=" + APIkey + "&language=en-US";
+        String res = makeAPICall(movieURL);
+        parseJSONdetails(res);
     }
 
     public static String makeAPICall(String url)
@@ -41,6 +50,12 @@ public class MovieAPI {
         }
     }
 
+    public static void parseJSONdetails(String json)
+    {
+        JSONObject jsonObj = new JSONObject(json);
+        System.out.println(jsonObj.getString("title") + " " + jsonObj.getInt("budget") + " " + jsonObj.getString("release_date"));
+    }
+
     public static void parseJSON(String json, ArrayList<Movie> movies)
     {
         JSONObject jsonObj = new JSONObject(json);
@@ -54,8 +69,10 @@ public class MovieAPI {
             String posterPath = movieObj.getString("poster_path");
             String fullPosterPath = "https://image.tmdb.org/t/p/w500" + posterPath;
             String release_date = movieObj.getString("release_date");
+            Number popularity = movieObj.getNumber("popularity");
+            String overview = movieObj.getString("overview");
 
-            Movie movie = new Movie(movieTitle, movieID, fullPosterPath, release_date);
+            Movie movie = new Movie(movieTitle, movieID, fullPosterPath, release_date,popularity, overview);
             movies.add(movie);
         }
     }
